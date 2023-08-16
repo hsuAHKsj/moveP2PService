@@ -1,0 +1,26 @@
+[
+  {
+    "ID": 1,
+    "StartPoint": [1, 1],
+    "EndPoint": [4, 4],
+    "Width": 0.2
+  },
+  {
+    "ID": 2,
+    "StartPoint": [2, 3],
+    "EndPoint": [5, 1],
+    "Width": 0.2
+  },
+  {
+    "ID": 3,
+    "StartPoint": [3, 2],
+    "EndPoint": [6, 5],
+    "Width": 0.2
+  },
+  {
+    "ID": 4,
+    "StartPoint": [4, 3],
+    "EndPoint": [2, 6],
+    "Width": 0.2
+  }
+]

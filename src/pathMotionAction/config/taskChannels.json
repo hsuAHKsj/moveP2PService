@@ -1,0 +1,26 @@
+[
+  {
+    "ID": 1,
+    "EndPoint": [2, 1],
+    "MainChannelID": 1,
+    "Radius": 0.2
+  },
+  {
+    "ID": 2,
+    "EndPoint": [2.5, 1.3],
+    "MainChannelID": 1,
+    "Radius": 0.2
+  },
+  {
+    "ID": 3,
+    "EndPoint": [6, 3.5],
+    "MainChannelID": 3,
+    "Radius": 0.2
+  },
+  {
+    "ID": 4,
+    "EndPoint": [1, 5],
+    "MainChannelID": 4,
+    "Radius": 0.2
+  }
+]
