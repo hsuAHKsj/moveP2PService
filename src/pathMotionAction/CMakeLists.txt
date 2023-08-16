@@ -41,8 +41,8 @@ include_directories("/usr/include/eigen3")
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 ## Declare a C++ executable
 
-add_executable(do_dishes_action_server_node 
-src/DoDishesActionServer.cpp
+add_executable(server_node 
+src/server.cpp
 src/PurePursuitServer.cpp)
 
 add_executable(client1 
@@ -55,7 +55,7 @@ src/PurePursuitClient.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 
-add_dependencies(do_dishes_action_server_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(server_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(client1 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(client2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -64,7 +64,7 @@ add_dependencies(client2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_T
 target_link_libraries(client1 ${catkin_LIBRARIES})
 target_link_libraries(client2 ${catkin_LIBRARIES})
 
- target_link_libraries(do_dishes_action_server_node
+ target_link_libraries(server_node
    ${catkin_LIBRARIES} libCmpAgu.a
  )
 
