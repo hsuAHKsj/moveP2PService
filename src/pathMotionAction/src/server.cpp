@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <PurePursuitServer.h>
+#include <moveP2PServer.h>
 
 int main(int argc, char **argv)
 {

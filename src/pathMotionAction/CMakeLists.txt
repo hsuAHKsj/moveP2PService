@@ -43,14 +43,15 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_executable(server_node 
 src/server.cpp
-src/PurePursuitServer.cpp)
+src/moveP2PServer.cpp
+src/purepursitFunction.cpp)
 
 add_executable(client1 
 src/client1.cpp
-src/PurePursuitClient.cpp)
+src/moveP2PClient.cpp)
 add_executable(client2 
 src/client2.cpp
-src/PurePursuitClient.cpp)
+src/moveP2PClient.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

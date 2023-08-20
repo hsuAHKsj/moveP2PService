@@ -1,5 +1,5 @@
   
-#include <PurePursuitServer.h>
+#include <moveP2PServer.h>
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <actionlib/server/simple_action_server.h>
@@ -13,9 +13,25 @@
   
   PurePursuitServer::PurePursuitServer() : as_(nh_, "pure_pursuit", false)
   {
+    nh_.getParam("car_linear_velocity_", car_linear_velocity_);
+    nh_.getParam("car_angular_velocity_", car_angular_velocity_);
+    nh_.getParam("preview_distance_", preview_dis_);
+    nh_.getParam("is_use_pid_param_", is_use_pid_param_);
+    nh_.getParam("Velocity_KP", pidParam.Velocity_KP);//PID参数加载
+    nh_.getParam("Velocity_KI", pidParam.Velocity_KI);
+    nh_.getParam("Velocity_KD", pidParam.Velocity_KD);
+    nh_.getParam("Position_KP", pidParam.Position_KP);
+    nh_.getParam("Position_KI", pidParam.Position_KI);
+    nh_.getParam("Position_KD", pidParam.Position_KD);
+    nh_.getParam("rounding_radius", blendingRaduis);
+
+
+    defaultHead = true;
     as_.registerGoalCallback(boost::bind(&PurePursuitServer::goalCallback, this));
     as_.registerPreemptCallback(boost::bind(&PurePursuitServer::preemptCallback, this));
     global_path_pub_ = nh_.advertise<nav_msgs::Path>("/global_path", 1);
+    cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
+
         // ------------------ 构造轨迹 --------------------------
     package_path = ros::package::getPath("pathMotionAction") + "/config";
     as_.start();
@@ -33,10 +49,8 @@
       return;
     }
 
-    // 发布全局轨迹
-
     // Execute the pure pursuit logic
-    executePurePursuit(goal->start_xy, goal->end_xy, goal->turning_radius);
+    executePurePursuit(goal->start_xy, goal->end_xy);
   }
 
   // 处理抢断
@@ -49,7 +63,7 @@
   }
 
   // 功能函数
-  void PurePursuitServer::executePurePursuit(const boost::array<double, 2>& start_xy, const boost::array<double, 2>& end_xy, const double blendingRaduis)
+  void PurePursuitServer::executePurePursuit(const boost::array<double, 2>& start_xy, const boost::array<double, 2>& end_xy)
   {
     ROS_INFO("Received an new goal.");
     bool success = initGlobalPlanningAlg(package_path);
@@ -65,37 +79,74 @@
     std::vector<OutputData> outputDataList = computeReedsSheppPaths(xytList);
     pubGlobalPath(outputDataList);
 
+    robotStateList robotStateList = outputDataList2VectorList(outputDataList);
 
+    // 输出最近的一个id 
+    int nearest_id = 0;
+    
+    // 找到并定义出起始zuobiao
     const double rate = 30.0;
     ros::Rate loop_rate(rate);
 
-    for (int i = 0; i < outputDataList.size() && ros::ok(); i++) {
-        const OutputData& output = outputDataList[i];
-        Eigen::MatrixXd m_path = output.path;
-        for(int ii = 0; ii < m_path.rows() && ros::ok(); ii++)
-        {
-            if (as_.isPreemptRequested()){
-                ROS_ERROR("exit the looping for preempted.");
-                // 发布执行完成的信息
-                ppResult result = convert2PPResult(m_roborState, stateEnum::STOP);
-                as_.setPreempted(result);
-                break;
-            }
-            VectorXd v = m_path.row(ii);
-            m_roborState = vectorXd2RobState(v);
-            ppFeedback feedback = convert2PPFeedback(m_roborState, stateEnum::MOVING);
-            as_.publishFeedback(feedback);
-            ros::spinOnce();
-            loop_rate.sleep();
-        }
-    }
+    // 执行，并且根据不同返回返回值返回状态
+    while (ros::ok())
+    {  
+      if (as_.isPreemptRequested()){
+          ROS_ERROR("exit the looping for preempted.");
+          // 发布执行完成的信息
+          ppResult result = convert2PPResult(m_roborState, stateEnum::PREEMPTED);
+          as_.setPreempted(result);
+          break;
+      }
 
+      if(is_current_pose_sub_)
+      {
+        run(robotStateList, cur_roborState);
+        switch(car_state_)//主状态机
+        {
+          case stateEnum::PURE_PURSUIT:{
+            ppFeedback feedback = convert2PPFeedback(m_roborState, stateEnum::PURE_PURSUIT);
+            as_.publishFeedback(feedback);
+            std::cout << "小车状态：纯跟踪跟线" << std::endl;
+            break;
+          }
+          case stateEnum::CORRECT_THE_LINE:{ 
+            ppFeedback feedback = convert2PPFeedback(m_roborState, stateEnum::CORRECT_THE_LINE);
+            as_.publishFeedback(feedback);
+            std::cout << "小车状态：纠正线路" << std::endl;
+            break;
+          }
+          case stateEnum::FINISHED:
+            std::cout << "小车状态：正常停车" << std::endl;
+            break; 
+          default:
+            break;
+        }
+        is_current_pose_sub_ = false;
+      }
+      else
+      {
+        std::cout << "no odom info recevied. " << std::endl;
+      }
+
+
+      static int stop_count = 0;
+      if (car_state_ == stateEnum::FINISHED)
+      {
+          stop_count ++;
+          if(stop_count > 10) break;
+      }else{
+        stop_count = 0;
+      }
+      ros::spinOnce();
+      loop_rate.sleep();
+    }
+            
     // 发布执行完成的信息
     ppResult result = convert2PPResult(m_roborState, stateEnum::FINISHED);
     as_.setSucceeded(result);
     return;
   }
-
 
   // 发布一个全局路径
   void PurePursuitServer::pubGlobalPath(const std::vector<OutputData>& outputDataList)
@@ -124,3 +175,5 @@
     global_path_pub_.publish(pathShow);
 
   }
+
+  

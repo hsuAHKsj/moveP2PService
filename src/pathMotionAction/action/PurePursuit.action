@@ -1,6 +1,5 @@
 # pure pursuit action
 # Goal
-float64 turning_radius
 float64[2] start_xy
 float64[2] end_xy
 ---
