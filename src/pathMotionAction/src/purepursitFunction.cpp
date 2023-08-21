@@ -10,18 +10,19 @@
     {
       robotState rs_check = rs_list.at(i);
       // 遍历所有路径点和当前位置的距离，保存到数组中
-      float lad = sqrt(pow(rs.x - rs_check.x, 2) + pow(rs.y - rs_check.x, 2));
+      float lad = sqrt(pow(rs.x - rs_check.x, 2) + pow(rs.y - rs_check.y, 2));
       best_points.push_back(lad);
     }
 
     index = distance(best_points.begin(), min_element(best_points.begin(), best_points.end()));
+    std::cout << "index_1 " << index << std::endl;
 
     int temp_index;
     for (int i = index; i < rs_list.size(); i++) 
     {
       robotState rs_check = rs_list.at(i);
       // 遍历路径点和预瞄点的距离，从最小横向位置的索引开始
-      float dis = sqrt(pow(rs.x - rs_check.x, 2) + pow(rs.y - rs_check.x, 2));
+      float dis = sqrt(pow(rs_list.at(index).x - rs_check.x, 2) + pow(rs_list.at(index).y - rs_check.y, 2));
       // 判断跟预瞄点的距离
       if (dis < preview_dis_) 
       {
@@ -33,7 +34,14 @@
       }
     }
     index = temp_index;
-    //std::cout << "index " << index << std::endl;
+    std::cout << "index_2 " << index << std::endl;
+    if(rs_list.at(index).headState == 1)
+    {
+        defaultHead = true;
+    }else{
+        defaultHead = true;
+    }
+    
 
     return index;
   }
@@ -56,23 +64,25 @@
 
   void PurePursuitServer::run(const robotStateList rs_list, const robotState& rs)
   {
+    cout << "Into run" << endl;
     int index = getIndex(rs_list, rs);
-    //std::cout << "index " << index << std::endl;
+    std::cout << "index " << index << std::endl;
     robotState rs_index = rs_list.at(index);
-    defaultHead = rs_index.headState;
+    m_roborState = rs_list.at(index);
+    
     robotState rs_end = rs_list.back();
 
     double alpha = thetaLimit(atan2(rs_index.y - cur_roborState.y, rs_index.x - cur_roborState.x) - cur_roborState.theta);
-    //std::cout << "alpha " << alpha << std::endl;//0~180度，-180度~0
+    std::cout << "alpha " << alpha << std::endl;//0~180度，-180度~0
 
     // 当前点和目标点的距离Id
     double dl = sqrt(pow(rs_index.y - cur_roborState.y, 2) + pow(rs_index.x - cur_roborState.x, 2));
 
     double curvature_k = 2 * sin(alpha) / dl;//跟踪曲率 k = 2 * sin(a) / Ld
-    //std::cout << "curvature_k " << curvature_k << std::endl;
+    std::cout << "curvature_k " << curvature_k << std::endl;
 
-    double dis_pos = sqrt(pow(rs_end.y - cur_roborState.y, 2) + pow(rs_end.y - cur_roborState.y, 2));//距离终点的距离
-    //std::cout << "dis_pos " << dis_pos << std::endl;
+    double dis_pos = sqrt(pow(rs_end.y - cur_roborState.y, 2) + pow(rs_end.x - cur_roborState.x, 2));//距离终点的距离
+    std::cout << "dis_pos " << dis_pos << std::endl;
 
     if((alpha >= 10.0 * M_PI / 180.0 || alpha <= -10.0 * M_PI / 180.0) && dl <= 0.5)//纠正线路
     {
@@ -93,7 +103,7 @@
     else
     {
       double theta = car_linear_velocity_ * curvature_k;
-      //std::cout << "theta " << theta << std::endl;
+      std::cout << "theta " << theta << std::endl;
 
       // 发布小车运动指令
       if(dl > 0.12 || index != (rs_list.size()-1)) 
@@ -106,8 +116,8 @@
             //增加串级PID控制线速度
             double motor = Position_PID(-dis_pos, 0.0);//小车当前位置到目标位置的距离，距离逐渐增加
             double sign;
-            if(defaultHead == true) sign = -1;
-            else if(defaultHead == false) sign = 1;
+            if(defaultHead == true) sign = 1;
+            else sign = -1;
 
             //Todo:
             double cur_v = 0;

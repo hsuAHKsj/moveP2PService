@@ -30,9 +30,11 @@
     as_.registerGoalCallback(boost::bind(&PurePursuitServer::goalCallback, this));
     as_.registerPreemptCallback(boost::bind(&PurePursuitServer::preemptCallback, this));
     global_path_pub_ = nh_.advertise<nav_msgs::Path>("/global_path", 1);
-    cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
+    cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/forklift_drive_controller/cmd_vel/", 10);
+    odom_sub_ = nh_.subscribe("/odom", 10, &PurePursuitServer::odomCallback, this);
 
-        // ------------------ 构造轨迹 --------------------------
+
+    // ------------------ 构造轨迹 --------------------------
     package_path = ros::package::getPath("pathMotionAction") + "/config";
     as_.start();
   }
@@ -85,7 +87,7 @@
     int nearest_id = 0;
     
     // 找到并定义出起始zuobiao
-    const double rate = 30.0;
+    const double rate = 10.0;
     ros::Rate loop_rate(rate);
 
     // 执行，并且根据不同返回返回值返回状态
@@ -102,6 +104,7 @@
       if(is_current_pose_sub_)
       {
         run(robotStateList, cur_roborState);
+
         switch(car_state_)//主状态机
         {
           case stateEnum::PURE_PURSUIT:{

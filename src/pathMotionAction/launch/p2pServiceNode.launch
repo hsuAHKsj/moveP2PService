@@ -1,0 +1,18 @@
+<!-- -->
+<launch>
+  <param name="car_linear_velocity_" type="double" value="0.5" /> <!--小车的线速度-->
+  <param name="car_angular_velocity_" type="double" value="0.05" /> <!--小车的角速度-->
+  <param name="preview_distance_" type="double" value="0.3" /> <!--预瞄距离-->
+  <param name="is_use_pid_param_" type="bool" value="true" /> <!--选择是否使用PID控制加减速-->
+  <param name="rounding_radius" type="double" value="0.2" />
+  <param name="Velocity_KP" type="double" value="0.5" />
+  <param name="Velocity_KI" type="double" value="0.0" />
+  <param name="Velocity_KD" type="double" value="-0.001" />
+  <param name="Position_KP" type="double" value="0.5" />
+  <param name="Position_KI" type="double" value="0.8" />
+  <param name="Position_KD" type="double" value="0.01" />
+
+  <node pkg="pathMotionAction" type="server_node" name="server_node" output="screen">
+  </node>       
+      
+</launch>

@@ -71,6 +71,7 @@ private:
 
   ros::Publisher global_path_pub_;  // 
   ros::Publisher cmd_vel_pub_;
+  ros::Subscriber odom_sub_;
 
   ros::NodeHandle nh_;  // 节点信息
   actionlib::SimpleActionServer<pathMotionAction::PurePursuitAction> as_;  // 纯跟踪服务
@@ -133,13 +134,13 @@ void odomCallback(const nav_msgs::Odometry &msg)
 {
     cur_roborState.x = msg.pose.pose.position.x;
     cur_roborState.y = msg.pose.pose.position.y;
-    if(defaultHead == true){
-        cur_roborState.theta = M_PI + tf::getYaw(msg.pose.pose.orientation);
-    }
-    else{
-        cur_roborState.theta = tf::getYaw(msg.pose.pose.orientation);
-    }
-
+    // if(defaultHead == true){
+    //     cur_roborState.theta = M_PI + tf::getYaw(msg.pose.pose.orientation);
+    // }
+    // else{
+    //     cur_roborState.theta = tf::getYaw(msg.pose.pose.orientation);
+    // }
+    cur_roborState.theta =  tf::getYaw(msg.pose.pose.orientation);
     is_current_pose_sub_ = true;
 }
 
