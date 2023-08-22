@@ -13,13 +13,13 @@
   },
   {
     "ID": 3,
-    "StartPoint": [6, 4],
+    "StartPoint": [6, 0],
     "EndPoint": [12, 10],
     "Width": 0.2
   },
   {
     "ID": 4,
-    "StartPoint": [8, 6],
+    "StartPoint": [12, 2],
     "EndPoint": [4, 12],
     "Width": 0.2
   }

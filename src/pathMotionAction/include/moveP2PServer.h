@@ -41,10 +41,6 @@ enum class headDirection{
     FORBACKWARD  = 1,                      // 向后
 };
 
-enum class stateEnum;
-
-
-
 typedef pathMotionAction::PurePursuitResult ppResult;
 typedef pathMotionAction::PurePursuitFeedback ppFeedback;
 typedef std::vector<robotState> robotStateList;
@@ -134,13 +130,13 @@ void odomCallback(const nav_msgs::Odometry &msg)
 {
     cur_roborState.x = msg.pose.pose.position.x;
     cur_roborState.y = msg.pose.pose.position.y;
-    // if(defaultHead == true){
-    //     cur_roborState.theta = M_PI + tf::getYaw(msg.pose.pose.orientation);
-    // }
-    // else{
-    //     cur_roborState.theta = tf::getYaw(msg.pose.pose.orientation);
-    // }
-    cur_roborState.theta =  tf::getYaw(msg.pose.pose.orientation);
+    if(defaultHead == true){
+        cur_roborState.theta = tf::getYaw(msg.pose.pose.orientation);
+    }
+    else{
+        cur_roborState.theta = M_PI + tf::getYaw(msg.pose.pose.orientation);
+    }
+    // cur_roborState.theta =  tf::getYaw(msg.pose.pose.orientation);
     is_current_pose_sub_ = true;
 }
 

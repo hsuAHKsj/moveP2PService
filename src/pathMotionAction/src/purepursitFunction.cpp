@@ -4,7 +4,7 @@
   int PurePursuitServer::getIndex(const robotStateList rs_list, const robotState& rs)
   {
     // 方案:通过计算当前坐标和目标轨迹距离，找到一个最小距离的索引号
-    int index;
+    int index_near;
     std::vector<double> best_points;
     for (int i = 0; i < rs_list.size(); i++) 
     {
@@ -14,32 +14,31 @@
       best_points.push_back(lad);
     }
 
-    index = distance(best_points.begin(), min_element(best_points.begin(), best_points.end()));
-    std::cout << "index_1 " << index << std::endl;
+    index_near = distance(best_points.begin(), min_element(best_points.begin(), best_points.end()));
+    std::cout << "index_1 " << index_near << std::endl;
 
-    int temp_index;
-    for (int i = index; i < rs_list.size(); i++) 
+    int index;
+    for (int i = index_near; i < rs_list.size(); i++) 
     {
       robotState rs_check = rs_list.at(i);
       // 遍历路径点和预瞄点的距离，从最小横向位置的索引开始
-      float dis = sqrt(pow(rs_list.at(index).x - rs_check.x, 2) + pow(rs_list.at(index).y - rs_check.y, 2));
+      float dis = sqrt(pow(rs_list.at(index_near).x - rs_check.x, 2) + pow(rs_list.at(index_near).y - rs_check.y, 2));
       // 判断跟预瞄点的距离
       if (dis < preview_dis_) 
       {
-        temp_index = i;
+        index = i;
       } 
       else 
       {
         break;
       }
     }
-    index = temp_index;
     std::cout << "index_2 " << index << std::endl;
     if(rs_list.at(index).headState == 1)
     {
         defaultHead = true;
     }else{
-        defaultHead = true;
+        defaultHead = false;
     }
     
 
