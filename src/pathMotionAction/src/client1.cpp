@@ -15,7 +15,7 @@ int main(int argc, char **argv)
   ROS_INFO("Action server started.");
 
   pathMotionAction::PurePursuitGoal goal;
-  goal.start_xy = {6, 3.5}; // Example values, replace with actual data
+  goal.start_xy = {2.5, 1.3}; // Example values, replace with actual data
   goal.end_xy = {1, 5};   // Example values, replace with actual data
 
   ac.sendGoal(goal, &doneCallback, &activeCallback, &feedbackCallback);
